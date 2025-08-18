@@ -27,17 +27,17 @@
 - **Python 3.7+** (推荐使用最新稳定版)
 - **依赖库**：
 
-[代码块开始：安装依赖]
+```bash
 pip install pandas openpyxl xlrd
-[代码块结束]
+```
 
 ### 快速安装
 
-[代码块开始：快速安装]
+```bash
 git clone https://github.com/yourusername/national-subsidy-matcher.git
 cd national-subsidy-matcher
 pip install -r requirements.txt
-[代码块结束]
+```
 
 ## 🚦 使用方法
 
@@ -50,24 +50,24 @@ pip install -r requirements.txt
 
 ### 2️⃣ 运行程序
 
-[代码块开始：运行主程序]
+```bash
 python main.py
-[代码块结束]
+```
 
-[代码块开始：快捷脚本]
+```bash
 ./run.sh
-[代码块结束]
+```
 
 ### 3️⃣ 参数配置 (config.ini)
 
-[代码块开始：配置文件]
+```bash
 [MATCHING_RULES]
 # 商品名称匹配规则 (支持：精确匹配、模糊匹配、包含关键字)
 product_name_match = 包含关键字
 
 # 规格匹配规则 (支持正则表达式)
 spec_match = (\d+[GgTt]?B?|\d+寸|\d+英寸)
-[代码块结束]
+```
 
 ### 4️⃣ 输出结果
 
@@ -79,7 +79,7 @@ spec_match = (\d+[GgTt]?B?|\d+寸|\d+英寸)
 
 ## 📂 文件结构
 
-[代码块开始：文件结构]
+```bash
 national-subsidy-matcher/
 ├── README.md
 ├── main.py                # 主程序入口
@@ -95,7 +95,7 @@ national-subsidy-matcher/
 └── tests/                 # 单元测试
     ├── test_matcher.py
     └── test_data/
-[代码块结束]
+```
 
 ## ⚠️ 注意事项
 
