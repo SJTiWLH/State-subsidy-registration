@@ -82,21 +82,18 @@ python 国补登记_V_1.0.py
 ## 📂 文件结构
 
 ```bash
-national-subsidy-matcher/
+国补登记/
 ├── README.md
-├── main.py                # 主程序入口
-├── config.ini             # 配置文件
-├── requirements.txt       # 依赖库列表
-├── data/                  # 数据目录
-│   ├── input/             # 输入文件存放处
-│   └── output/            # 处理结果输出位置
-├── utils/                 # 核心功能模块
-│   ├── matcher.py         # 智能匹配引擎
-│   ├── reporter.py        # 报告生成器
-│   └── validator.py       # 数据验证工具
-└── tests/                 # 单元测试
-    ├── test_matcher.py
-    └── test_data/
+├── 国补登记_V_1.0.py               # 主程序入口  
+├── 企业库存数量.xlsx             # 配置文件
+├── requirements.txt           # 依赖库列表
+├── 3c商品名表格/               # 数据目录           
+│   └── 一系列表格              # 输入文件存放处
+├── 抖音表格/                  # 输入文件存放处
+│   └── 一系列表格              # 数据验证工具
+├── 国补登记结果.xlsx           # 处理结果输出位置
+└── 垫资款结果.xlsx             # 处理结果输出位置
+
 ```
 
 ## ⚠️ 注意事项
