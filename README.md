@@ -27,15 +27,32 @@
 - **Python 3.7+** (推荐使用最新稳定版)
 - **依赖库**：
 
+## 🚀 安装步骤
+
+
+# 1. 克隆仓库到本地
 ```bash
-pip install pandas openpyxl xlrd
+git clone https://github.com/SJTiWLH/Finance_performance_Calculation.git
+
 ```
 
-### 快速安装
-
+# 2. 创建虚拟环境（推荐）
 ```bash
-git clone https://github.com/yourusername/national-subsidy-matcher.git
-cd national-subsidy-matcher
+python -m venv .venv
+```
+
+# 3. 激活虚拟环境
+## Windows系统
+```bash
+.venv\Scripts\activate
+```
+## Mac/Linux系统
+```bash
+source .venv/bin/activate
+```
+
+# 4. 安装依赖包
+```bash
 pip install -r requirements.txt
 ```
 
@@ -45,8 +62,9 @@ pip install -r requirements.txt
 
 | 文件类型 | 文件名 | 说明 |
 |----------|--------|------|
-| 抖音国补订单 | `douyin_orders.xlsx` | 包含订单号、商品名称等关键字段 |
-| 3C商品数据 | `3c_products.xlsx` | 包含3C编号、商品名称、规格等信息 |
+| 抖音国补订单 | `3c商品名表格` | 包含订单号、商品名称等关键字段，存档到该文件夹中 |
+| 3C商品数据 | `抖音表格` | 包含3C编号、商品名称、规格等信息 |
+| 企业库存数量 | `企业库存数量.xlsx`|从在线表格上下载最新的并保存在根目录|
 
 ### 2️⃣ 运行程序
 
