@@ -238,7 +238,7 @@ def merge_excel_with_duplicates(input_dir, order_column, output_path=None):
         print(f"\n❌ 保存文件失败: {str(e)}")
         return None
     # 根据文件名称中的订单批次来判断该文件是否下载重复。
-
+    # 根据文件名中的订单批次去重
 def merge_excel_by_batch(input_dir, order_column, output_path=None):
     """
     合并Excel文件，根据文件名中用"-"分割的第四个元素（订单批次）检测重复文件
@@ -571,7 +571,7 @@ def match_data(product_name):
 
     return version, model, memory, color
 
-#  根据拿到的sheet名，取出规格型号及名称  字典
+    #  根据拿到的sheet名，取出规格型号及名称  字典
 def generate_model_name_dict(file_path, sheet_name=None):
     """
     从企业库存数量中提取 规格型号 → 名称 映射字典
@@ -606,7 +606,7 @@ def generate_model_name_dict(file_path, sheet_name=None):
         model_name_dict[model] = unique_names
 
     return model_name_dict
-#  主要代码，进行名称匹配
+    #  主要代码，进行名称匹配
 def count_unique_shops_with_sheet(sheet_file_path, guige_file_path,output_path,sheet_name=None):
     """
     统计表格中“店铺名”列的不重复值，并转换为对应的sheet名,根据sheet名，获取总字典。
@@ -673,7 +673,6 @@ def count_unique_shops_with_sheet(sheet_file_path, guige_file_path,output_path,s
         # 示例：将店铺名和商品名拼接作为结果
         pipei_sheet_name =  parse_shop_to_sheet(shop_name) # 字典匹配sheet名称
 
-        print(product_name)
         version,model,memory,color = match_data(product_name) # 从这个里面拿规格。 四个参数分别是 版本 型号 内存 颜色
         memory = convert_memory_format(memory)  # 格式化 内存大小 8G+256G -> 8GB+256GB
 
@@ -719,11 +718,10 @@ def count_unique_shops_with_sheet(sheet_file_path, guige_file_path,output_path,s
 
         elif len(final_result) == 0 :
             if isinstance(pipei_data_list, list):
-                print(pipei_data_list)
                 processed_result = f"有{model}规格，但是没有对应的配置"
 
-            elif isinstance(pipei_data_list, str): # 判断是否为字符串 未匹配到该型号
-                processed_result = pipei_data_list# 是字符串则返回本身 未匹配到该型号
+            elif isinstance(pipei_data_list, str):  # 判断是否为字符串 未匹配到该型号
+                processed_result = pipei_data_list  # 是字符串则返回本身 未匹配到该型号
 
         # print(processed_result)
         # print("========================")
@@ -891,13 +889,13 @@ def main(process_step):
         guige_file_path = "企业库存数量.xlsx"
         pipei_output_path = f"./中间文件—可忽略/国补登记结果_未处理.xlsx"
         count_unique_shops_with_sheet(sheet_file_path, guige_file_path, pipei_output_path)
-        print(f"\n🎉 步骤3执行完成！")
+        print(f"\n🎉 步骤4执行完成！")
 
 
     def step5():
         print("\n===== 步骤4：整理表格格式 =====")
         document_file(f"./中间文件—可忽略/国补登记结果_未处理.xlsx","国补登记结果.xlsx")
-        document_file(f"./中间文件—可忽略/垫资款结果_未处理.xlsx","垫资款结果.xlsx")
+        # document_file(f"./中间文件—可忽略/垫资款结果_未处理.xlsx","垫资款结果.xlsx")
 
 
     # 根据传入的参数执行对应流程
