@@ -389,7 +389,7 @@ def create_guobu_table(douyin_path, output_guobu_path):
     # 订单货款的单独表格字段
     dingdan_fields = ["账单批次","店铺主体", "费用项名称","行类型","sku单号","商品一级类目","商品信息.1","税率","订单应付金额（元）", "政府补贴（元）", "分账金额（元）", "服务费用（元）", "平台折扣（元）","订单实付（元）","采购折扣比例","采购折扣金额（元）","采购成本（元）", "结算金额（元）","创建时间","备注","店铺名"]
     # 垫资款的单独表格字段
-    dianzi_fields = ["店铺主体","账单批次","sku单号","订单应付金额（元）", "政府补贴（元）", "分账金额（元）", "服务费用（元）", "平台折扣（元）", "订单实付（元）","采购折扣比例","采购折扣金额（元）","采购成本（元）", "结算金额（元）","创建时间","备注","行类型","店铺名"]
+    dianzi_fields = ["店铺主体","sku单号","账单批次","行类型","订单应付金额（元）", "政府补贴（元）", "分账金额（元）", "服务费用（元）", "平台折扣（元）", "订单实付（元）","采购折扣比例","采购折扣金额（元）","采购成本（元）", "结算金额（元）","创建时间","备注","店铺名"]
 
     missing_fields = [f for f in required_fields if f not in douyin_df.columns]
     if missing_fields:
@@ -413,6 +413,9 @@ def create_guobu_table(douyin_path, output_guobu_path):
         (douyin_df["行类型"] != "订单退款") &  # 排除"订单退款"
         (douyin_df["行类型"].str[:2] != "订单")  # 排除前两个字是"订单"的情况
         ][dianzi_fields].copy()  #  编写垫资款的国补登记结果
+    lastName_idx = dianzi_df.columns.get_loc("政府补贴（元）")
+    dianzi_df.insert(lastName_idx + 1, "店铺补贴（元）", "")
+    dianzi_df.insert(lastName_idx + 1, "自营补贴（元）", "")
 
 
 
