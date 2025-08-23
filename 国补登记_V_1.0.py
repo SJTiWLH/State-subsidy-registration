@@ -19,7 +19,7 @@ def process_order_numbers(input_path):
 
     # 读取Excel文件
     try:
-        excel_data = pd.read_excel(input_path, sheet_name=None)
+        excel_data = pd.read_excel(input_path, sheet_name=None,dtype=object)
         main_sheet = next(iter(excel_data.keys()))  # 取第一个sheet
         df = excel_data[main_sheet].copy()
     except Exception as e:
@@ -163,13 +163,14 @@ def merge_excel_with_duplicates(input_dir, order_column, output_path=None):
                     # ======================================================
 
                     # 第一步：先读取表头，确认订单列是否存在
-                    df_header = pd.read_excel(file_path, nrows=0)
+                    df_header = pd.read_excel(file_path, nrows=0,dtype=object)
                     if order_column not in df_header.columns:
                         raise ValueError(f"文件 {file} 缺少订单字段: {order_column}")
 
                     # 第二步：读取完整数据，强制订单列为字符串
                     df = pd.read_excel(
-                        file_path,
+                        file_path
+                        ,dtype=object,
                         converters={order_column: str}
                     )
 
@@ -239,6 +240,7 @@ def merge_excel_with_duplicates(input_dir, order_column, output_path=None):
         return None
     # 根据文件名称中的订单批次来判断该文件是否下载重复。
     # 根据文件名中的订单批次去重
+
 def merge_excel_by_batch(input_dir, order_column, output_path=None):
     """
     合并Excel文件，根据文件名中用"-"分割的第四个元素（订单批次）检测重复文件
@@ -294,14 +296,15 @@ def merge_excel_by_batch(input_dir, order_column, output_path=None):
                     # ======================================================
 
                     # 第一步：先读取表头，确认订单列是否存在
-                    df_header = pd.read_excel(file_path, nrows=0)
+                    df_header = pd.read_excel(file_path, nrows=0,dtype=object)
                     if order_column not in df_header.columns:
                         raise ValueError(f"文件 {file} 缺少订单字段: {order_column}")
 
                     # 第二步：读取完整数据，强制订单列为字符串
                     df = pd.read_excel(
-                        file_path,
-                        converters={order_column: str}
+                        file_path
+                        ,dtype=object
+                        # converters={order_column: str}
                     )
 
                     # ==================== 添加店铺相关字段（放在最前面） ====================
@@ -374,7 +377,8 @@ def create_guobu_table(douyin_path, output_guobu_path):
     try:
         douyin_df = pd.read_excel(
             douyin_path,
-            converters={"sku单号": str}  # 强制以字符串读取，保留原始格式
+            dtype = object,
+            # converters={"sku单号": str}  # 强制以字符串读取，保留原始格式
         )
         print(f"✅ 成功读取抖音订单表，共 {len(douyin_df)} 条记录")
     except Exception as e:
@@ -383,9 +387,9 @@ def create_guobu_table(douyin_path, output_guobu_path):
     # 要操作的所有字段，检查抖音汇总文件是否缺少字段
     required_fields = ["店铺主体","sku单号", "订单应付金额（元）", "政府补贴（元）", "采购成本（元）","服务费用（元）","行类型", "账单批次"]
     # 订单货款的单独表格字段
-    dingdan_fields = ["账单批次","店铺主体","sku单号", "订单应付金额（元）", "政府补贴（元）", "采购成本（元）", "服务费用（元）","店铺名","行类型"]
+    dingdan_fields = ["账单批次","店铺主体", "费用项名称","行类型","sku单号","商品一级类目","商品信息.1","税率","订单应付金额（元）", "政府补贴（元）", "分账金额（元）", "服务费用（元）", "平台折扣（元）","订单实付（元）","采购折扣比例","采购折扣金额（元）","采购成本（元）", "结算金额（元）","创建时间","备注","店铺名"]
     # 垫资款的单独表格字段
-    dianzi_fields = ["店铺主体","账单批次","sku单号","采购成本（元）","服务费用（元）","行类型","店铺名"]
+    dianzi_fields = ["店铺主体","账单批次","sku单号","订单应付金额（元）", "政府补贴（元）", "分账金额（元）", "服务费用（元）", "平台折扣（元）", "订单实付（元）","采购折扣比例","采购折扣金额（元）","采购成本（元）", "结算金额（元）","创建时间","备注","行类型","店铺名"]
 
     missing_fields = [f for f in required_fields if f not in douyin_df.columns]
     if missing_fields:
@@ -396,10 +400,13 @@ def create_guobu_table(douyin_path, output_guobu_path):
         (douyin_df["行类型"] == "订单退款") |  # 条件2：等于"订单退款"
         (douyin_df["行类型"].str[:2] == "订单")  # 条件3：前两个字是"订单"
         ][dingdan_fields].copy() # 编写订单货款的国补登记结果
-    lastName_idx = dingdan_fields.columns.get_loc("服务费用（元）")
+    lastName_idx = dingdan_fields.columns.get_loc("商品一级类目")
     dingdan_fields.insert(lastName_idx + 1, "名称", "")
     dingdan_fields.insert(lastName_idx + 2, "规格", "")
     dingdan_fields.insert(lastName_idx + 3, "3c商品名称", "")
+    lastName_idx = dingdan_fields.columns.get_loc("政府补贴（元）")
+    dingdan_fields.insert(lastName_idx + 1, "店铺补贴（元）", "")
+    dingdan_fields.insert(lastName_idx + 1, "自营补贴（元）", "")
 
     dianzi_df = douyin_df[
         (douyin_df["行类型"] != "订单货款") &  # 排除"订单货款"
@@ -455,8 +462,8 @@ def fill_3c_name(guobu_path, wangdian_path):
     # 关键修复3：读取国补表时，再次强制"sku单号"为字符串
     try:
         guobu_df = pd.read_excel(
-            guobu_path,
-            converters={"sku单号": str}
+            guobu_path,dtype=object,
+            # converters={"sku单号": str}
         )
         print(f"\n✅ 读取国补登记结果，共 {len(guobu_df)} 条记录")
     except Exception as e:
@@ -465,8 +472,8 @@ def fill_3c_name(guobu_path, wangdian_path):
     # 关键修复4：读取网店表时，强制"网店单号-去后缀"为字符串
     try:
         wangdian_df = pd.read_excel(
-            wangdian_path,
-            converters={"网店单号-去后缀": str}  # 强制字符串，避免精度丢失
+            wangdian_path,dtype=object
+            # converters={"网店单号-去后缀": str}  # 强制字符串，避免精度丢失
         )
         print(f"✅ 读取网店单号汇总表，共 {len(wangdian_df)} 条记录")
     except Exception as e:
@@ -589,6 +596,7 @@ def generate_model_name_dict(file_path, sheet_name=None):
     df = pd.read_excel(
         file_path,
         sheet_name=sheet_name,
+        dtype = object,
         header=2,  # 第4行是列名行（A4:名称、C4:规格型号）
         usecols=["名称", "规格型号"],  # 只加载需要的列
         engine='openpyxl'
@@ -625,9 +633,11 @@ def count_unique_shops_with_sheet(sheet_file_path, guige_file_path,output_path,s
 
     # 读取表格数据
     if sheet_name:
-        df = pd.read_excel(sheet_file_path, sheet_name=sheet_name)
+        df = pd.read_excel(sheet_file_path,dtype=object, sheet_name=sheet_name)
     else:
-        df = pd.read_excel(sheet_file_path,converters={"sku单号": str})  # 默认读取第一个工作表
+        df = pd.read_excel(sheet_file_path,dtype=object
+                           # ,converters={"sku单号": str}
+                           )  # 默认读取第一个工作表
         # df = pd.read_excel("国补登记结果.xlsx")  # 默认读取第一个工作表
 
     # 检查是否包含“店铺名”列
@@ -759,7 +769,7 @@ def document_file(file_path, output_path=None, sheet_name=None):
         print(f"使用工作表: {sheet_name}")
 
     # 读取数据，确保sku单号为字符串类型
-    df = pd.read_excel(file_path, sheet_name=sheet_name, dtype={'sku单号': str})
+    df = pd.read_excel(file_path, sheet_name=sheet_name, dtype=object)
 
     # 确保数据按账单批次排序（相同的排在一起）
     df = df.sort_values(by='账单批次')
