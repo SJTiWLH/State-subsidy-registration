@@ -6,6 +6,11 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment
 from openpyxl.utils.dataframe import dataframe_to_rows
 
+
+'''
+国补二次登记，需要先下载国补表到根目录，还是在第一次国补登记的目录中。
+需要用到的文件是，新下载的国补表，还有中间文件——可忽略文件夹中的垫资款文件，及二次登记的数据。
+'''
 def unmerge_and_fill(excel_path, sheet_name, save_path=None):
     # 加载工作簿
     wb = load_workbook(excel_path, data_only=True)
@@ -42,12 +47,12 @@ def unmerge_and_fill(excel_path, sheet_name, save_path=None):
     wb.close()
     # print(df.head())
     return df
-def process_excel_files(table1_path, table2_path, output_table1_path, output_table2_path):
+def process_excel_files(table1_path, table2_path, output_table1_path, output_table2_path,sheet_name):
     # 读取表1，指定dtype为object以保持原始数据类型
     df1 = pd.read_excel(table1_path, dtype=object)
 
     # 读取表2，指定dtype为object以保持原始数据类型
-    df2 = unmerge_and_fill(table2_path,sheet_name="抖音-华为星桥专卖店")
+    df2 = unmerge_and_fill(table2_path,sheet_name=sheet_name)
     # df2 = pd.read_excel(table2_path,sheet_name="抖音-华为星桥专卖店", dtype=object,header=1)
 
     # 检查必要字段是否存在
@@ -157,11 +162,24 @@ def process_excel_files(table1_path, table2_path, output_table1_path, output_tab
     for col_idx, column in enumerate(df2.columns, 1):
         ws.cell(row=1, column=col_idx, value=column)
 
-    # 写入数据行，确保数据类型不变
+    sku_col_idx = None
+    for idx, col_name in enumerate(df2.columns, 1):
+        if col_name == "sku单号":
+            sku_col_idx = idx
+            break
+
+    # 写入数据行，同时处理sku单号的文本格式
     for row_idx, row in enumerate(dataframe_to_rows(df2, index=False, header=False), 2):
         for col_idx, value in enumerate(row, 1):
-            # 直接写入原始值，不进行类型转换
-            ws.cell(row=row_idx, column=col_idx, value=value)
+            cell = ws.cell(row=row_idx, column=col_idx, value=value)
+            # 对sku单号列设置文本格式
+            if col_idx == sku_col_idx:
+                cell.number_format = '@'
+    # # 写入数据行，确保数据类型不变
+    # for row_idx, row in enumerate(dataframe_to_rows(df2, index=False, header=False), 2):
+    #     for col_idx, value in enumerate(row, 1):
+    #         # 直接写入原始值，不进行类型转换
+    #         ws.cell(row=row_idx, column=col_idx, value=value)
 
     batch_col_idx = None
     shop_col_idx = None
@@ -210,7 +228,51 @@ def process_excel_files(table1_path, table2_path, output_table1_path, output_tab
     print(f"处理完成！")
     print(f"已标记的表1已保存至: {output_table1_path}")
     print(f"已更新的表2已保存至: {output_table2_path}")
+def select_shop():
+    """
+    用户交互选择店铺，返回选中的店铺名称（用于sheet_name赋值）
+    """
+    # 1. 定义店铺列表（与数字1-8对应）
+    shops = [
+        "抖音-华为星桥专卖店",
+        "抖音-vivo丽坤专卖店",
+        "抖音-华为崇云专卖店",
+        "抖音-华为浩昌数码专卖店",
+        "京东-崇云平板旗舰店",
+        "抖音-荣耀星桥专卖店",
+        "抖音-华为智慧通达专卖店",
+        "抖音-vivo平板旗舰店"
+    ]
 
+    # 2. 打印店铺选择菜单
+    print("=" * 60)
+    print(" 欢迎使用国补二次登记，请确保已下载最新国补表，并且中间文件中包含要登记的表格          ")
+    print("                请选择需要处理的店铺（输入1-8）          ")
+    print("=" * 60)
+    for i, shop in enumerate(shops, 1):  # 遍历店铺，显示“数字+店铺名”
+        print(f"          {i} → {shop}")
+    print("=" * 60)
+
+    # 3. 循环获取用户输入（直到输入合法）
+    while True:
+        user_input = input("请输入选择的数字（1-8）：").strip()  # 获取输入并去除空格
+
+        # 3.1 验证输入是否为数字
+        if not user_input.isdigit():
+            print(f"❌ 输入错误！请输入1-8之间的数字，当前输入：{user_input}")
+            continue
+
+        # 3.2 验证数字是否在1-8范围内
+        select_num = int(user_input)
+        if select_num < 1 or select_num > 8:
+            print(f"❌ 数字超出范围！请输入1-8之间的数字，当前输入：{select_num}")
+            continue
+
+        # 3.3 输入合法，返回对应的店铺名
+        selected_shop = shops[select_num - 1]  # 列表索引从0开始，需减1
+        print(f"\n✅ 已选择店铺：{selected_shop}")
+        print("=" * 50)
+        return selected_shop
 # 使用示例
 if __name__ == "__main__":
     # 请替换为实际的文件路径
@@ -218,9 +280,11 @@ if __name__ == "__main__":
     table2_path = "国补表.xlsx"
     output_table1_path = "垫资款_已标记.xlsx"
     output_table2_path = "国补_已更新.xlsx"
+    sheet_name = select_shop()
+    # sheet_name = "抖音-华为星桥专卖店"
 
     try:
-        process_excel_files(table1_path, table2_path, output_table1_path, output_table2_path)
+        process_excel_files(table1_path, table2_path, output_table1_path, output_table2_path,sheet_name)
     except Exception as e:
         print(f"操作失败: {str(e)}")
         traceback.print_exc()
