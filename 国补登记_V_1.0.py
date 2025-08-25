@@ -170,8 +170,8 @@ def merge_excel_with_duplicates(input_dir, order_column, output_path=None):
                     # 第二步：读取完整数据，强制订单列为字符串
                     df = pd.read_excel(
                         file_path
-                        ,dtype=object,
-                        converters={order_column: str}
+                        ,dtype=object
+                        # ,converters={order_column: str}
                     )
 
                     # ==================== 新增：添加店铺主体字段（放在最前面） ====================
